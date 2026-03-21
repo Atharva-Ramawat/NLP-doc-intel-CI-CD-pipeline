@@ -3,7 +3,7 @@ pipeline {
     
     // 🧹 This is the new block! It automatically deletes old builds.
     options {
-        buildDiscarder(logRotator(numToKeepStr: '3'))
+        buildDiscarder(logRotator(numToKeepStr: '4'))
     }
     
     stages {
