@@ -1,4 +1,4 @@
-pipeline {
+ pipeline {
     agent any
     
     options {
@@ -24,11 +24,11 @@ pipeline {
         
         stage('SonarQube Analysis') {
             environment {
-                // Grabs the scanner we just installed in Jenkins Tools
+                // Grabbing the scanner installed in Jenkins Tools
                 SCANNER_HOME = tool 'sonar-scanner'
             }
             steps {
-                // Connects using the Server configuration and Secret Token we added
+                // Connecting using the Server configuration 
                 withSonarQubeEnv('sonar-server') {
                     sh '''
                     echo "🔍 Starting Static Code Analysis..."
