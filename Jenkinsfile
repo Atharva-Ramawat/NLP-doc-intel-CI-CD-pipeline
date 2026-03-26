@@ -6,7 +6,6 @@ pipeline {
     }
     
     environment {
-
         DOCKER_IMAGE = "atharvaramawat/nlp-doc-intel:latest"
     }
     
@@ -66,7 +65,6 @@ pipeline {
 
         stage('Push to Docker Hub') {
             steps {
-                
                 withCredentials([usernamePassword(credentialsId: 'docker-cred', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
                     sh '''
                     echo "☁️ Logging into Docker Hub and pushing image..."
