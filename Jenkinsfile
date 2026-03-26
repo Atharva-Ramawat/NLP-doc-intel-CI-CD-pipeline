@@ -5,6 +5,11 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '4'))
     }
     
+    environment {
+
+        DOCKER_IMAGE = "atharvaramawat/nlp-doc-intel:latest"
+    }
+    
     stages {
         stage('Checkout Code') {
             steps {
@@ -24,11 +29,9 @@ pipeline {
         
         stage('SonarQube Analysis') {
             environment {
-                // Grabs the scanner we just installed in Jenkins Tools
                 SCANNER_HOME = tool 'sonar-scanner'
             }
             steps {
-                // Connects using the Server configuration and Secret Token we added
                 withSonarQubeEnv('sonar-server') {
                     sh '''
                     echo "🔍 Starting Static Code Analysis..."
@@ -38,6 +41,38 @@ pipeline {
                       -Dsonar.sources=. \
                       -Dsonar.python.version=3.10 \
                       -Dsonar.exclusions=venv/**,tests/**,**/*.txt
+                    '''
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                echo "🐳 Building the Docker Image..."
+                docker build -t $DOCKER_IMAGE .
+                '''
+            }
+        }
+
+        stage('Trivy Security Scan') {
+            steps {
+                sh '''
+                echo "🛡️ Scanning image for CRITICAL and HIGH vulnerabilities..."
+                trivy image --severity CRITICAL,HIGH $DOCKER_IMAGE
+                '''
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                
+                withCredentials([usernamePassword(credentialsId: 'docker-cred', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                    sh '''
+                    echo "☁️ Logging into Docker Hub and pushing image..."
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push $DOCKER_IMAGE
+                    docker logout
                     '''
                 }
             }
