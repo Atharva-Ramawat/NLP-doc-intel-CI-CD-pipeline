@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nlp-fastapi-deployment
+  labels:
+    app: nlp-fastapi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nlp-fastapi
+  template:
+    metadata:
+      labels:
+        app: nlp-fastapi
+    spec:
+      containers:
+      - name: nlp-fastapi-container
+        image: atharvaramawat/nlp-doc-intel:latest
+        ports:
+        - containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nlp-fastapi-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: nlp-fastapi
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
