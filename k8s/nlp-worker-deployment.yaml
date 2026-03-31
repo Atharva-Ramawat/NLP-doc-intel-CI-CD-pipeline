@@ -15,7 +15,7 @@ spec:
       containers:
       - name: nlp-worker
         image: atharvaramawat/nlp-doc-intel:latest
-        command: ["python", "worker.py"] # Assuming worker.py is your background script
+        command: ["python", "worker.py"] 
         env:
         - name: REDIS_HOST
           value: "redis-service"
