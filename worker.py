@@ -19,6 +19,6 @@ try:
         
 except Exception as e:
     print(f"❌ Failed to connect to Redis: {e}")
-  
+    # Still sleep so the container doesn't crash-loop instantly
     while True:
         time.sleep(10)
