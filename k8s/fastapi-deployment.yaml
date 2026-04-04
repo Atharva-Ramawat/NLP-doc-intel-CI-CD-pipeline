@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        app: nlp-fastapi
+        app : nlp-fastapi
     spec:
       containers:
       - name: nlp-fastapi-container
