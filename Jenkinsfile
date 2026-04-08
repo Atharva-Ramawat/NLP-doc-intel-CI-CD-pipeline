@@ -6,7 +6,7 @@ pipeline {
     }
     
     environment {
-        DOCKER_IMAGE = "atharvaramawat/nlp-doc-intel:latest"
+        DOCKER_IMAGE = "atharvaramawat/nlp-doc-intel:"
     }
     
     stages {
