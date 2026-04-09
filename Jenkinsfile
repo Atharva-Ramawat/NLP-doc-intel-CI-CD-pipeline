@@ -2,7 +2,11 @@ pipeline {
     agent any
     
     options {
+<<<<<<< HEAD
         buildDiscarder(logRotator(numToKeepStr: '4'))
+=======
+        buildDiscarder(logRotator(numToKeepStr: '6'))
+>>>>>>> 73d921dc3423976a24c405ce0877f2fcbb75a2e6
     }
     
     environment {
