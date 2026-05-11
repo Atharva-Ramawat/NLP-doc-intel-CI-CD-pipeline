@@ -20,25 +20,35 @@ pipeline {
             steps {
                 sh '''
                 echo "🚀 Starting Python Unit Tests..."
-                # Added quotes around "$(pwd)" to handle the spaces in the workspace path
+                # Quotes added around $(pwd) to protect against spaces in the Jenkins workspace path
                 docker run --rm -v "$(pwd)":/app -w /app python:3.10-slim /bin/bash -c "pip install --no-cache-dir -r requirements.txt && pytest test_main.py -v"
                 echo "✅ Tests Passed Successfully!"
                 '''
             }
         }
         
-       stage('SonarQube Analysis') {
+        stage('SonarQube Analysis') {
             environment {
                 SCANNER_HOME = tool 'sonar-scanner'
             }
             steps {
                 // Grab the token securely from Jenkins credentials
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    // Bypass the plugin and force the URL and Token directly into the command
-                    sh "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.host.url=http://172.31.35.18:9000 -Dsonar.login=${SONAR_TOKEN} -Dsonar.projectKey=nlp-doc-intel -Dsonar.projectName=nlp-doc-intel -Dsonar.sources=. -Dsonar.python.version=3.10 -Dsonar.exclusions=venv/**,tests/**,**/*.txt"
+                    // Using single quotes (''') ensures Linux evaluates the variables, preventing Jenkins syntax crashes
+                    sh '''
+                    $SCANNER_HOME/bin/sonar-scanner \
+                      -Dsonar.host.url=http://172.31.35.18:9000 \
+                      -Dsonar.login=$SONAR_TOKEN \
+                      -Dsonar.projectKey=nlp-doc-intel \
+                      -Dsonar.projectName="nlp-doc-intel" \
+                      -Dsonar.sources=. \
+                      -Dsonar.python.version=3.10 \
+                      -Dsonar.exclusions="venv/**,tests/**,**/*.txt"
+                    '''
                 }
             }
         }
+
         stage('Build Docker Image') {
             steps {
                 sh '''
