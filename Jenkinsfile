@@ -32,22 +32,20 @@ pipeline {
                 SCANNER_HOME = tool 'sonar-scanner'
             }
             steps {
-                // This block injects the SONAR_AUTH_TOKEN environment variable
-                withSonarQubeEnv('sonar-server') {
-                    sh '''
-                    echo "🔍 Starting Static Code Analysis..."
-                    $SCANNER_HOME/bin/sonar-scanner \
-                      -Dsonar.projectKey=nlp-doc-intel \
-                      -Dsonar.projectName="nlp-doc-intel" \
-                      -Dsonar.sources=. \
-                      -Dsonar.python.version=3.10 \
-                      -Dsonar.token=$SONAR_AUTH_TOKEN \
-                      -Dsonar.exclusions=venv/**,tests/**,**/*.txt
-                    '''
+                // We use 'withCredentials' to be 100% sure the token is available
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    withSonarQubeEnv('sonar-server') {
+                        sh '''
+                        $SCANNER_HOME/bin/sonar-scanner \
+                          -Dsonar.projectKey=nlp-doc-intel \
+                          -Dsonar.projectName="nlp-doc-intel" \
+                          -Dsonar.sources=. \
+                          -Dsonar.token=$SONAR_TOKEN
+                        '''
+                    }
                 }
             }
         }
-
         stage('Build Docker Image') {
             steps {
                 sh '''
