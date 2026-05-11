@@ -32,9 +32,10 @@ pipeline {
                 SCANNER_HOME = tool 'sonar-scanner'
             }
             steps {
-                withSonarQubeEnv('sonar-server') {
-                    // Putting the entire command on one line prevents Bash syntax errors
-                    sh "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=nlp-doc-intel -Dsonar.projectName=nlp-doc-intel -Dsonar.sources=. -Dsonar.python.version=3.10 -Dsonar.exclusions=venv/**,tests/**,**/*.txt"
+                // Grab the token securely from Jenkins credentials
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    // Bypass the plugin and force the URL and Token directly into the command
+                    sh "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.host.url=http://172.31.35.18:9000 -Dsonar.login=${SONAR_TOKEN} -Dsonar.projectKey=nlp-doc-intel -Dsonar.projectName=nlp-doc-intel -Dsonar.sources=. -Dsonar.python.version=3.10 -Dsonar.exclusions=venv/**,tests/**,**/*.txt"
                 }
             }
         }
