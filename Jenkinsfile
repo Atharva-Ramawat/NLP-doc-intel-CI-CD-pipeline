@@ -27,22 +27,14 @@ pipeline {
             }
         }
         
-        stage('SonarQube Analysis') {
+       stage('SonarQube Analysis') {
             environment {
                 SCANNER_HOME = tool 'sonar-scanner'
             }
             steps {
-                // We use 'withCredentials' to be 100% sure the token is available
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    withSonarQubeEnv('sonar-server') {
-                        sh '''
-                        $SCANNER_HOME/bin/sonar-scanner \
-                          -Dsonar.projectKey=nlp-doc-intel \
-                          -Dsonar.projectName="nlp-doc-intel" \
-                          -Dsonar.sources=. \
-                          -Dsonar.token=$SONAR_TOKEN
-                        '''
-                    }
+                withSonarQubeEnv('sonar-server') {
+                    // Putting the entire command on one line prevents Bash syntax errors
+                    sh "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectKey=nlp-doc-intel -Dsonar.projectName=nlp-doc-intel -Dsonar.sources=. -Dsonar.python.version=3.10 -Dsonar.exclusions=venv/**,tests/**,**/*.txt"
                 }
             }
         }
