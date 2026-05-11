@@ -20,7 +20,8 @@ pipeline {
             steps {
                 sh '''
                 echo "🚀 Starting Python Unit Tests..."
-                docker run --rm -v $(pwd):/app -w /app python:3.10-slim /bin/bash -c "pip install --no-cache-dir -r requirements.txt && pytest test_main.py -v"
+                # Added quotes around "$(pwd)" to handle the spaces in the workspace path
+                docker run --rm -v "$(pwd)":/app -w /app python:3.10-slim /bin/bash -c "pip install --no-cache-dir -r requirements.txt && pytest test_main.py -v"
                 echo "✅ Tests Passed Successfully!"
                 '''
             }
