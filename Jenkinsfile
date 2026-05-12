@@ -20,7 +20,8 @@ pipeline {
             steps {
                 sh '''
                 echo "🚀 Starting Python Unit Tests..."
-                docker run --rm -v $(pwd):/app -w /app python:3.10-slim /bin/bash -c "pip install --no-cache-dir -r requirements.txt && pytest test_main.py -v"
+                # Quotes added around $(pwd) to protect against spaces in the Jenkins workspace path
+                docker run --rm -v "$(pwd)":/app -w /app python:3.10-slim /bin/bash -c "pip install --no-cache-dir -r requirements.txt && pytest test_main.py -v"
                 echo "✅ Tests Passed Successfully!"
                 '''
             }
@@ -31,15 +32,18 @@ pipeline {
                 SCANNER_HOME = tool 'sonar-scanner'
             }
             steps {
-                withSonarQubeEnv('sonar-server') {
+                // Grab the token securely from Jenkins credentials
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    // Using single quotes (''') ensures Linux evaluates the variables, preventing Jenkins syntax crashes
                     sh '''
-                    echo "🔍 Starting Static Code Analysis..."
                     $SCANNER_HOME/bin/sonar-scanner \
+                      -Dsonar.host.url=http://172.31.35.18:9000 \
+                      -Dsonar.login=$SONAR_TOKEN \
                       -Dsonar.projectKey=nlp-doc-intel \
                       -Dsonar.projectName="nlp-doc-intel" \
                       -Dsonar.sources=. \
                       -Dsonar.python.version=3.10 \
-                      -Dsonar.exclusions=venv/**,tests/**,**/*.txt
+                      -Dsonar.exclusions="venv/**,tests/**,**/*.txt"
                     '''
                 }
             }
