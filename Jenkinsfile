@@ -14,11 +14,12 @@ pipeline {
             steps {
                 checkout scm
                 script {
-                    // This is the hard check to kill the loop immediately
                     def lastCommitMsg = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
                     if (lastCommitMsg.contains('[skip ci]')) {
+                        echo "🛑 [skip ci] detected. Stopping build gracefully to prevent loop."
                         currentBuild.result = 'ABORTED'
-                        error("🛑 Stopping: Automated GitOps commit detected. Loop prevented!")
+                        // This 'return' stops the pipeline WITHOUT throwing a red error
+                        return 
                     }
                 }
             }
