@@ -5,3 +5,4 @@ httpx
 redis
 minio
 psycopg2-binary
+python-multipart
