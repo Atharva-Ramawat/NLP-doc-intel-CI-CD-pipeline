@@ -19,7 +19,8 @@ pipeline {
         stage('Set Version') {
             steps {
                 script {
-                    env.VERSION = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    env.VERSION = "v${env.BUILD_NUMBER}"
+                    
                     env.DOCKER_IMAGE = "${env.IMAGE_REPO}:${env.VERSION}"
                 }
                 echo "🚀 Preparing to build Version: ${env.VERSION}"
