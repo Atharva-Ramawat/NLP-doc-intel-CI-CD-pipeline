@@ -27,7 +27,7 @@ kind: Service
 metadata:
   name: nlp-fastapi-service
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: nlp-fastapi
   ports:
