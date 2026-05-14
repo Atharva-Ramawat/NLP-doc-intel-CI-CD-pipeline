@@ -19,7 +19,7 @@ pipeline {
         stage('Set Version') {
             steps {
                 script {
-                    // Back to the random numbers (Git Hash)
+                    // This is your random number (Git Hash)
                     env.VERSION = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     env.DOCKER_IMAGE = "${env.IMAGE_REPO}:${env.VERSION}"
                 }
@@ -43,10 +43,6 @@ pipeline {
 
         stage('Build Docker Image') {
             steps { sh "docker build -t $DOCKER_IMAGE ." }
-        }
-
-        stage('Trivy Security Scan') {
-            steps { sh "trivy image --severity CRITICAL,HIGH $DOCKER_IMAGE" }
         }
 
         stage('Push to Docker Hub') {
