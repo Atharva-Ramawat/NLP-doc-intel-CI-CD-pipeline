@@ -10,6 +10,7 @@ pipeline {
     }
     
     stages {
+        // We keep the gatekeeper here to prevent the infinite loop!
         stage('Initialize & Check') {
             steps {
                 checkout scm
@@ -35,7 +36,8 @@ pipeline {
                 stage('Set Version') {
                     steps {
                         script {
-                            env.VERSION = "v${env.BUILD_NUMBER}"
+                            // REVERTED: Back to using the Git Commit Hash!
+                            env.VERSION = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                             env.DOCKER_IMAGE = "${env.IMAGE_REPO}:${env.VERSION}"
                         }
                         echo "🚀 Preparing to build Version: ${env.VERSION}"
