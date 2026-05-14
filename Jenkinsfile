@@ -6,7 +6,7 @@ pipeline {
     }
     
     environment {
-        DOCKER_IMAGE = "atharvaramawat/nlp-doc-intel:latest"
+        IMAGE_REPO = "atharvaramawat/nlp-doc-intel"
     }
     
     stages {
@@ -15,12 +15,21 @@ pipeline {
                 checkout scm
             }
         }
+
+        stage('Set Version') {
+            steps {
+                script {
+                    env.VERSION = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    env.DOCKER_IMAGE = "${env.IMAGE_REPO}:${env.VERSION}"
+                }
+                echo "🚀 Preparing to build Version: ${env.VERSION}"
+            }
+        }
         
         stage('Run Unit Tests') {
             steps {
                 sh '''
                 echo "🚀 Starting Python Unit Tests..."
-                # Quotes added around $(pwd) to protect against spaces in the Jenkins workspace path
                 docker run --rm -v "$(pwd)":/app -w /app python:3.10-slim /bin/bash -c "pip install --no-cache-dir -r requirements.txt && pytest test_main.py -v"
                 echo "✅ Tests Passed Successfully!"
                 '''
@@ -32,9 +41,7 @@ pipeline {
                 SCANNER_HOME = tool 'sonar-scanner'
             }
             steps {
-                // Grab the token securely from Jenkins credentials
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    // Using single quotes (''') ensures Linux evaluates the variables, preventing Jenkins syntax crashes
                     sh '''
                     $SCANNER_HOME/bin/sonar-scanner \
                       -Dsonar.host.url=http://172.31.35.18:9000 \
@@ -52,7 +59,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                echo "🐳 Building the Docker Image..."
+                echo "🐳 Building Docker Image: $DOCKER_IMAGE"
                 docker build -t $DOCKER_IMAGE .
                 '''
             }
@@ -75,6 +82,29 @@ pipeline {
                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                     docker push $DOCKER_IMAGE
                     docker logout
+                    '''
+                }
+            }
+        }
+
+        stage('Update GitOps Manifests') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github-token-cred', passwordVariable: 'GIT_TOKEN', usernameVariable: 'GIT_USER')]) {
+                    sh '''
+                    echo "📝 Updating Kubernetes YAML files with new version: $VERSION"
+                    
+                    sed -i "s|image: atharvaramawat/nlp-doc-intel:.*|image: ${DOCKER_IMAGE}|g" k8s/fastapi-deployment.yaml
+                    sed -i "s|image: atharvaramawat/nlp-doc-intel:.*|image: ${DOCKER_IMAGE}|g" k8s/worker-deployment.yaml
+                    
+                    echo "📦 Committing changes to GitHub..."
+                    git config user.name "Jenkins CI/CD"
+                    git config user.email "jenkins@automation.local"
+                    
+                    git add k8s/fastapi-deployment.yaml k8s/worker-deployment.yaml
+                    git commit -m "ci: automated deployment update to version ${VERSION} [skip ci]"
+                    
+                    echo "🚀 Pushing changes to GitHub securely..."
+                    git push https://${GIT_USER}:${GIT_TOKEN}@github.com/Atharva-Ramawat/nlp-doc-intel.git HEAD:main
                     '''
                 }
             }
