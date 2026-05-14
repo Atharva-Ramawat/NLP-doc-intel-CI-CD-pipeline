@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: nlp-worker
-        image: atharvaramawat/nlp-doc-intel:bcc4f42
+        image: atharvaramawat/nlp-doc-intel:4dd2fb1
         imagePullPolicy: Always
         command: ["python", "worker.py"] 
         env:
