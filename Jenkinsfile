@@ -10,38 +10,30 @@ pipeline {
     }
     
     stages {
-        stage('Initial Check') {
+        stage('Checkout Code') {
             steps {
-                script {
-                    // Check the message before doing anything else
-                    env.COMMIT_MSG = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
-                    if (env.COMMIT_MSG.contains('[skip ci]')) {
-                        echo "🛑 Automated commit detected. Skipping all further stages."
-                        currentBuild.result = 'SUCCESS'
-                    }
-                }
+                checkout scm
             }
         }
 
         stage('Set Version') {
-            when { expression { !env.COMMIT_MSG.contains('[skip ci]') } }
             steps {
                 script {
+                    // Random Number (Git Hash) Versioning
                     env.VERSION = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     env.DOCKER_IMAGE = "${env.IMAGE_REPO}:${env.VERSION}"
                 }
+                echo "🚀 Building Version: ${env.VERSION}"
             }
         }
         
         stage('Run Unit Tests') {
-            when { expression { !env.COMMIT_MSG.contains('[skip ci]') } }
             steps {
                 sh 'docker run --rm -v "$(pwd)":/app -w /app python:3.10-slim /bin/bash -c "pip install --no-cache-dir -r requirements.txt && pytest test_main.py -v"'
             }
         }
         
         stage('SonarQube Analysis') {
-            when { expression { !env.COMMIT_MSG.contains('[skip ci]') } }
             environment { SCANNER_HOME = tool 'sonar-scanner' }
             steps {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
@@ -51,12 +43,10 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            when { expression { !env.COMMIT_MSG.contains('[skip ci]') } }
             steps { sh "docker build -t $DOCKER_IMAGE ." }
         }
 
         stage('Push to Docker Hub') {
-            when { expression { !env.COMMIT_MSG.contains('[skip ci]') } }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-cred', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
                     sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin && docker push $DOCKER_IMAGE && docker logout'
@@ -65,7 +55,6 @@ pipeline {
         }
 
         stage('Update GitOps Manifests') {
-            when { expression { !env.COMMIT_MSG.contains('[skip ci]') } }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-token-cred', passwordVariable: 'GIT_TOKEN', usernameVariable: 'GIT_USER')]) {
                     sh '''
@@ -75,7 +64,7 @@ pipeline {
                     git config user.name "Jenkins CI/CD"
                     git config user.email "jenkins@automation.local"
                     
-                    git add k8s/*.yaml
+                    git add k8s/fastapi-deployment.yaml k8s/nlp-worker-deployment.yaml
                     git commit -m "ci: automated deployment update to version ${VERSION} [skip ci]"
                     
                     git push https://${GIT_USER}:${GIT_TOKEN}@github.com/Atharva-Ramawat/NLP-doc-intel-CI-CD-pipeline.git HEAD:main
