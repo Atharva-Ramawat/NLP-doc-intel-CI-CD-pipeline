@@ -1,6 +1,4 @@
-
-
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 
 app = FastAPI()
 
@@ -9,5 +7,6 @@ def read_root():
     return {"status": "healthy", "service": "Ingestion API is running"}
 
 @app.post("/upload/")
-def upload_document(filename: str):
-    return {"message": f"Document {filename} received for NLP processing."}
+async def upload_document(file: UploadFile = File(...)):
+    # file.filename automatically extracts the name of the file you uploaded
+    return {"message": f"Document {file.filename} received for NLP processing."}
