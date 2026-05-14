@@ -10,16 +10,24 @@ pipeline {
     }
     
     stages {
-        stage('Checkout Code') {
+        // We do the checkout and the loop-check together so the UI stays flat
+        stage('Checkout & Check Trigger') {
             steps {
                 checkout scm
+                script {
+                    def commitMsg = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    if (commitMsg.contains('[skip ci]')) {
+                        currentBuild.result = 'ABORTED'
+                        error("Pipeline safely aborted to prevent infinite loop.")
+                    }
+                }
             }
         }
 
         stage('Set Version') {
             steps {
                 script {
-                    // Back to your exact Git Commit Hashes (Random Numbers)
+                    // Generates the "random numbers" (Git commit hash)
                     env.VERSION = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     env.DOCKER_IMAGE = "${env.IMAGE_REPO}:${env.VERSION}"
                 }
@@ -88,37 +96,28 @@ pipeline {
             }
         }
 
+        // Exactly the block you pasted
         stage('Update GitOps Manifests') {
             steps {
-                script {
-                    // Check the commit message right before we push
-                    def commitMsg = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                withCredentials([usernamePassword(credentialsId: 'github-token-cred', passwordVariable: 'GIT_TOKEN', usernameVariable: 'GIT_USER')]) {
+                    sh '''
+                    echo "📝 Updating Kubernetes YAML files with new version: $VERSION"
                     
-                    if (commitMsg.contains('[skip ci]')) {
-                        echo "🛑 Automated GitOps commit detected."
-                        echo "✅ Skipping the GitHub push to prevent an infinite loop."
-                        echo "🟢 Pipeline exiting fully Green to maintain UI alignment!"
-                    } else {
-                        // It's a normal commit, do the push!
-                        withCredentials([usernamePassword(credentialsId: 'github-token-cred', passwordVariable: 'GIT_TOKEN', usernameVariable: 'GIT_USER')]) {
-                            sh '''
-                            echo "📝 Updating Kubernetes YAML files with new version: $VERSION"
-                            
-                            sed -i "s|image: atharvaramawat/nlp-doc-intel:.*|image: ${DOCKER_IMAGE}|g" k8s/fastapi-deployment.yaml
-                            sed -i "s|image: atharvaramawat/nlp-doc-intel:.*|image: ${DOCKER_IMAGE}|g" k8s/nlp-worker-deployment.yaml
-                            
-                            echo "📦 Committing changes to GitHub..."
-                            git config user.name "Jenkins CI/CD"
-                            git config user.email "jenkins@automation.local"
-                            
-                            git add k8s/fastapi-deployment.yaml k8s/nlp-worker-deployment.yaml
-                            git commit -m "ci: automated deployment update to version ${VERSION} [skip ci]"
-                            
-                            echo "🚀 Pushing changes to GitHub securely..."
-                            git push https://${GIT_USER}:${GIT_TOKEN}@github.com/Atharva-Ramawat/NLP-doc-intel-CI-CD-pipeline.git HEAD:main
-                            '''
-                        }
-                    }
+                    # CORRECTED: Changed to nlp-worker-deployment.yaml
+                    sed -i "s|image: atharvaramawat/nlp-doc-intel:.*|image: ${DOCKER_IMAGE}|g" k8s/fastapi-deployment.yaml
+                    sed -i "s|image: atharvaramawat/nlp-doc-intel:.*|image: ${DOCKER_IMAGE}|g" k8s/nlp-worker-deployment.yaml
+                    
+                    echo "📦 Committing changes to GitHub..."
+                    git config user.name "Jenkins CI/CD"
+                    git config user.email "jenkins@automation.local"
+                    
+                    # CORRECTED: Changed to nlp-worker-deployment.yaml
+                    git add k8s/fastapi-deployment.yaml k8s/nlp-worker-deployment.yaml
+                    git commit -m "ci: automated deployment update to version ${VERSION} [skip ci]"
+                    
+                    echo "🚀 Pushing changes to GitHub securely..."
+                    git push https://${GIT_USER}:${GIT_TOKEN}@github.com/Atharva-Ramawat/NLP-doc-intel-CI-CD-pipeline.git HEAD:main
+                    '''
                 }
             }
         }
