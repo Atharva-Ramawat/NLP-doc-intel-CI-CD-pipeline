@@ -9,13 +9,22 @@ pipeline {
         IMAGE_REPO = "atharvaramawat/nlp-doc-intel"
     }
     
-    stages {
-        stage('Checkout Code') {
+    stage('Checkout Code') {
             steps {
                 checkout scm
+                script {
+                    // Check if the very last commit message contains [skip ci]
+                    def lastCommitMsg = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    
+                    if (lastCommitMsg.contains('[skip ci]')) {
+                        echo "🛑 [skip ci] detected in Git history. Aborting this build to stop the loop."
+                        // We mark it as ABORTED so it doesn't count as a failure
+                        currentBuild.result = 'ABORTED'
+                        error("Stopping build: Automated commit detected.")
+                    }
+                }
             }
         }
-
         stage('Set Version') {
             steps {
                 script {
