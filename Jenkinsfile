@@ -15,7 +15,17 @@ pipeline {
                 checkout scm
             }
         }
-
+        stage('Prevent Infinite Loop') {
+            steps {
+                script {
+                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    if (commitMessage.contains('[skip ci]')) {
+                        currentBuild.result = 'ABORTED'
+                        error("Stopping pipeline automatically because this is an automated GitOps commit.")
+                    }
+                }
+            }
+        }
         stage('Set Version') {
             steps {
                 script {
