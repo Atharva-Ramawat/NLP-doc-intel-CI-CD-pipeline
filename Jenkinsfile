@@ -10,27 +10,32 @@ pipeline {
     }
     
     stages {
+        stage('Check Trigger') {
+            steps {
+                script {
+                    env.COMMIT_MESSAGE = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    
+                    if (env.COMMIT_MESSAGE.contains('[skip ci]')) {
+                        echo "🛑 [skip ci] detected in commit message. Halting pipeline to prevent infinite loop."
+                        currentBuild.result = 'SUCCESS' 
+                        error("Expected pipeline stop due to automated GitOps commit.")
+                    } else {
+                        echo "✅ Valid commit detected. Proceeding with CI/CD..."
+                    }
+                }
+            }
+        }
+
         stage('Checkout Code') {
             steps {
                 checkout scm
             }
         }
-        stage('Prevent Infinite Loop') {
-            steps {
-                script {
-                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
-                    if (commitMessage.contains('[skip ci]')) {
-                        currentBuild.result = 'ABORTED'
-                        error("Stopping pipeline automatically because this is an automated GitOps commit.")
-                    }
-                }
-            }
-        }
+
         stage('Set Version') {
             steps {
                 script {
                     env.VERSION = "v${env.BUILD_NUMBER}"
-                    
                     env.DOCKER_IMAGE = "${env.IMAGE_REPO}:${env.VERSION}"
                 }
                 echo "🚀 Preparing to build Version: ${env.VERSION}"
@@ -104,7 +109,6 @@ pipeline {
                     sh '''
                     echo "📝 Updating Kubernetes YAML files with new version: $VERSION"
                     
-                    # CORRECTED: Changed to nlp-worker-deployment.yaml
                     sed -i "s|image: atharvaramawat/nlp-doc-intel:.*|image: ${DOCKER_IMAGE}|g" k8s/fastapi-deployment.yaml
                     sed -i "s|image: atharvaramawat/nlp-doc-intel:.*|image: ${DOCKER_IMAGE}|g" k8s/nlp-worker-deployment.yaml
                     
@@ -112,7 +116,6 @@ pipeline {
                     git config user.name "Jenkins CI/CD"
                     git config user.email "jenkins@automation.local"
                     
-                    # CORRECTED: Changed to nlp-worker-deployment.yaml
                     git add k8s/fastapi-deployment.yaml k8s/nlp-worker-deployment.yaml
                     git commit -m "ci: automated deployment update to version ${VERSION} [skip ci]"
                     
