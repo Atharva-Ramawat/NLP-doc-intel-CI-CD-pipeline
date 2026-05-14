@@ -93,18 +93,20 @@ pipeline {
                     sh '''
                     echo "📝 Updating Kubernetes YAML files with new version: $VERSION"
                     
+                    # CORRECTED: Changed to nlp-worker-deployment.yaml
                     sed -i "s|image: atharvaramawat/nlp-doc-intel:.*|image: ${DOCKER_IMAGE}|g" k8s/fastapi-deployment.yaml
-                    sed -i "s|image: atharvaramawat/nlp-doc-intel:.*|image: ${DOCKER_IMAGE}|g" k8s/worker-deployment.yaml
+                    sed -i "s|image: atharvaramawat/nlp-doc-intel:.*|image: ${DOCKER_IMAGE}|g" k8s/nlp-worker-deployment.yaml
                     
                     echo "📦 Committing changes to GitHub..."
                     git config user.name "Jenkins CI/CD"
                     git config user.email "jenkins@automation.local"
                     
-                    git add k8s/fastapi-deployment.yaml k8s/worker-deployment.yaml
+                    # CORRECTED: Changed to nlp-worker-deployment.yaml
+                    git add k8s/fastapi-deployment.yaml k8s/nlp-worker-deployment.yaml
                     git commit -m "ci: automated deployment update to version ${VERSION} [skip ci]"
                     
                     echo "🚀 Pushing changes to GitHub securely..."
-                    git push https://${GIT_USER}:${GIT_TOKEN}@github.com/Atharva-Ramawat/nlp-doc-intel.git HEAD:main
+                    git push https://${GIT_USER}:${GIT_TOKEN}@github.com/Atharva-Ramawat/NLP-doc-intel-CI-CD-pipeline.git HEAD:main
                     '''
                 }
             }
