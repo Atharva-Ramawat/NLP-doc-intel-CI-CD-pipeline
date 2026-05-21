@@ -1,28 +1,39 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: main-ingress
+  name: grafana-ingress
+  namespace: YOUR_GRAFANA_NAMESPACE  # <-- We add this!
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
   ingressClassName: nginx
   rules:
-  - host: mycluster.local
   - http:
       paths:
-      
-      - path: /grafana
+      - path: /grafana/?(.*)
         pathType: Prefix
         backend:
           service:
             name: observability-stack-grafana
             port:
               number: 80
-      # Route for Argo CD
-      - path: /argo
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argo-ingress
+  namespace: argocd                 # <-- We add this!
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /argo/?(.*)
         pathType: Prefix
         backend:
           service:
             name: argocd-server
             port:
-              number: 80
+              number: 80  
