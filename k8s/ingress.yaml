@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: main-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      # Route for Grafana
+      - path: /grafana
+        pathType: Prefix
+        backend:
+          service:
+            name: observability-stack-grafana
+            port:
+              number: 80
+      # Route for Argo CD
+      - path: /argo
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              number: 80
