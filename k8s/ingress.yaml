@@ -10,7 +10,7 @@ spec:
   - host: mycluster.local
   - http:
       paths:
-      # Route for Grafana
+      
       - path: /grafana
         pathType: Prefix
         backend:
