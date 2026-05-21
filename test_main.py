@@ -9,7 +9,6 @@ def test_read_root():
     assert response.json() == {"status": "healthy", "service": "Ingestion API is running"}
 
 def test_upload_document():
-    # We create a fake physical file in memory to send to the new endpoint
     fake_file = {"file": ("sample_invoice.pdf", b"dummy file content", "application/pdf")}
     
     response = client.post("/upload/", files=fake_file)
