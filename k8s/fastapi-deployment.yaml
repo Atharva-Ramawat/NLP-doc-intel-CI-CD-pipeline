@@ -22,7 +22,7 @@ spec:
         - containerPort: 8000
 
 ---
-apiVersion: v
+apiVersion: v1
 kind: Service
 metadata:
   name: nlp-fastapi-service
