@@ -1,20 +1,19 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: grafana-ingress
-  namespace: monitoring
+  name: nlp-fastapi-ingress
+  namespace: default
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
   - http:
       paths:
-      - path: /grafana/?(.*)
-        pathType: ImplementationSpecific
+      - path: /upload
+        pathType: Prefix
         backend:
           service:
-            name: observability-stack-grafana
+            name: nlp-fastapi-service
             port:
               number: 80
