@@ -13,10 +13,9 @@ spec:
         app: nlp-worker
     spec:
       containers:
-      - name: nlp-worker
-        image: atharvaramawat/nlp-doc-intel:8da7a44
-        imagePullPolicy: Always
-        command: ["python", "worker.py"] 
+      - name: nlp-worker-container
+        image: atharvaramawat/nlp-doc-intel:latest 
+        command: ["python", "-u", "worker.py"]
         env:
         - name: REDIS_HOST
           value: "redis-service"
