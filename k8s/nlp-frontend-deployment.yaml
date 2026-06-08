@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nlp-frontend-deployment
+  namespace: default
+  labels:
+    app: nlp-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nlp-frontend
+  template:
+    metadata:
+      labels:
+        app: nlp-frontend
+    spec:
+      containers:
+      - name: nlp-frontend-container
+        image: atharvaramawat/nlp-frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8501
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nlp-frontend-service
+  namespace: default
+spec:
+  type: NodePort
+  ports:
+  - port: 8501
+    targetPort: 8501
+    nodePort: 30085
+  selector:
+    app: nlp-frontend
