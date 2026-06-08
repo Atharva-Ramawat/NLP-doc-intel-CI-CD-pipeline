@@ -19,7 +19,7 @@ spec:
         command: ["python", "-u", "worker.py"]
 =======
       - name: nlp-worker
-        image: atharvaramawat/nlp-doc-intel:fa9260b
+        image: atharvaramawat/nlp-doc-intel:0048850
         imagePullPolicy: Always
         command: ["python", "worker.py"] 
 >>>>>>> 004885080178c9fe9e3f0ab11a6f7b42c435c05b
