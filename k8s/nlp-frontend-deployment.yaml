@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: nlp-frontend-container
-        image: atharvaramawat/nlp-frontend:latest
+        image: atharvaramawat/nlp-frontend:d35ad6d
         imagePullPolicy: Always
         ports:
         - containerPort: 8501
