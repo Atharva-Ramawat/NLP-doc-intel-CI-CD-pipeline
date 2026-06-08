@@ -11,7 +11,7 @@ client = TestClient(app)
 def test_read_root():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"status": "healthy", "service": "Ingestion API is running"}
+    assert response.json() == {"status": "healthy", "service": "NLP Document Ingestion API"}
 
 @patch('main.minio_client')
 @patch('main.r')
