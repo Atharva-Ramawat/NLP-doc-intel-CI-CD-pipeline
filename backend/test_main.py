@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 
 # Create mock clients to bypass connection testing errors
 with patch('redis.Redis'), patch('minio.Minio'):
-    from backend.main import app
+    from main import app
 
 client = TestClient(app)
 
