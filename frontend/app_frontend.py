@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Configuration - points to your FastAPI service port
-API_URL = "http://127.0.0.1:30237" 
+API_URL = "frontend/app_frontend.py" 
 
 st.set_page_config(page_title="NLP Document Intelligence", page_icon="📄", layout="wide")
 
