@@ -47,8 +47,11 @@ def get_db_connection():
 @app.on_event("startup")
 def init_storage_and_db():
     # 1. Ensure MinIO bucket exists
-    if not minio_client.bucket_exists(BUCKET_NAME):
-        minio_client.make_bucket(BUCKET_NAME)
+    try:
+        if not minio_client.bucket_exists(BUCKET_NAME):
+            minio_client.make_bucket(BUCKET_NAME)
+    except Exception as e:
+        print(f"⚠️ MinIO initialization warning: {e}")
         
     # 2. Safely Initialize Database Table Structure across multi-replica setups
     table_creation_query = """
@@ -69,7 +72,7 @@ def init_storage_and_db():
         conn.close()
         print("✅ Database verification complete. Table structure is ready.")
     except Exception as e:
-        # If another replica created the sequence at the exact same millisecond, catch it gracefully
+        # Catches the 'relation sequence already exists' error gracefully if another replica runs it simultaneously
         print(f"⚠️ Notice during table initialization (likely handled by concurrent replica): {e}")
 
 @app.get("/")
