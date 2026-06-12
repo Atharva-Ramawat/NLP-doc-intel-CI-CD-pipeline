@@ -45,10 +45,32 @@ def get_db_connection():
     )
 
 @app.on_event("startup")
-def init_storage():
-    # Ensure MinIO bucket exists
+def init_storage_and_db():
+    # 1. Ensure MinIO bucket exists
     if not minio_client.bucket_exists(BUCKET_NAME):
         minio_client.make_bucket(BUCKET_NAME)
+        
+    # 2. Safely Initialize Database Table Structure across multi-replica setups
+    table_creation_query = """
+    CREATE TABLE IF NOT EXISTS processed_docs (
+        id SERIAL PRIMARY KEY,
+        filename VARCHAR(255) NOT NULL,
+        extracted_text TEXT,
+        summary TEXT,
+        processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    """
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(table_creation_query)
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("✅ Database verification complete. Table structure is ready.")
+    except Exception as e:
+        # If another replica created the sequence at the exact same millisecond, catch it gracefully
+        print(f"⚠️ Notice during table initialization (likely handled by concurrent replica): {e}")
 
 @app.get("/")
 def read_root():
@@ -92,8 +114,8 @@ def get_processed_documents():
         # RealDictCursor parses rows automatically into clean dictionaries/JSON objects
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
-        # Querying columns including an calculated or stored word_count if available
-        cur.execute("SELECT id, filename, summary FROM processed_docs ORDER BY id DESC;")
+        # Added extracted_text into the query selection to properly support your frontend split view
+        cur.execute("SELECT id, filename, extracted_text, summary FROM processed_docs ORDER BY id DESC;")
         records = cur.fetchall()
         
         cur.close()
