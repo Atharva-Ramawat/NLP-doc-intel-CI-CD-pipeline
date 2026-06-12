@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # CORRECTED: Point to the internal Kubernetes service name & container port
-API_URL = "http://3.7.108.41:30085" 
+API_URL = "http://nlp-fastapi-service.default.svc.cluster.local:8000" 
 
 st.set_page_config(page_title="NLP Document Intelligence", page_icon="📄", layout="wide")
 
