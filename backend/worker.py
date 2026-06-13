@@ -82,15 +82,22 @@ with db_conn.cursor() as cursor:
     print(" PostgreSQL database schema verified.")
 
 # Initialize Storage & Messaging hooks
-r = redis.Redis(host=REDIS_HOST, port=6379, db=0, decode_responses=True)
+# CORRECTED: Added health_check_interval to prevent Kubernetes from dropping idle network sockets
+r = redis.Redis(host=REDIS_HOST, port=6379, db=0, decode_responses=True, health_check_interval=30)
 minio_client = Minio(MINIO_HOST, access_key=MINIO_USER, secret_key=MINIO_PASS, secure=False)
 
 print(" Worker fully armed. Listening on queue 'nlp_jobs'...")
 
 while True:
     try:
-        # Blocking POP from Redis pipeline queue
-        queue_name, message = r.blpop("nlp_jobs", 0)
+        # CORRECTED: Added a 30-second timeout so the connection gracefully wakes up and retries instead of freezing
+        result = r.blpop("nlp_jobs", timeout=30)
+        
+        # If no message arrived in 30 seconds, result is None. Just loop back and try again!
+        if not result:
+            continue
+            
+        queue_name, message = result
         job_data = json.loads(message)
         
         filename = job_data.get("filename")
