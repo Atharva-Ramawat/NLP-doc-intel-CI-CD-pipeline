@@ -29,7 +29,7 @@ BUCKET_NAME = "documents"
 DB_HOST = os.getenv("DB_HOST", "postgres-service")
 DB_NAME = os.getenv("DB_NAME", "doc_intel")
 DB_USER = os.getenv("DB_USER", "admin")
-DB_PASS = os.getenv("DB_PASSWORD", "admin123")
+DB_PASS = os.getenv("DB_PASSWORD", "password123")
 
 # Initialize Cache & Storage Clients
 r = redis.Redis(host=REDIS_HOST, port=6379, db=0, decode_responses=True)
