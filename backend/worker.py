@@ -16,7 +16,7 @@ MINIO_USER = os.getenv("MINIO_ROOT_USER", "admin")
 MINIO_PASS = os.getenv("MINIO_ROOT_PASSWORD", "password123")
 
 DB_HOST = os.getenv("DB_HOST", "postgres-service")
-DB_USER = os.getenv("POSTGRES_USER", "admin")
+DB_USER = os.getenv("POSTGRES_USER", "postgres")
 DB_PASS = os.getenv("POSTGRES_PASSWORD", "password123")
 DB_NAME = os.getenv("POSTGRES_DB", "doc_intel")
 
