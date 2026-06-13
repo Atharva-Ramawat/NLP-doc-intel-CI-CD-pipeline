@@ -29,7 +29,7 @@ BUCKET_NAME = "documents"
 DB_HOST = os.getenv("DB_HOST", "postgres-service")
 DB_NAME = os.getenv("DB_NAME", "doc_intel")
 DB_USER = os.getenv("DB_USER", "admin")
-DB_PASS = os.getenv("DB_PASSWORD", "admin123")
+DB_PASS = os.getenv("DB_PASSWORD", "password123")
 
 # Initialize Cache & Storage Clients
 r = redis.Redis(host=REDIS_HOST, port=6379, db=0, decode_responses=True)
@@ -45,10 +45,35 @@ def get_db_connection():
     )
 
 @app.on_event("startup")
-def init_storage():
-    # Ensure MinIO bucket exists
-    if not minio_client.bucket_exists(BUCKET_NAME):
-        minio_client.make_bucket(BUCKET_NAME)
+def init_storage_and_db():
+    # 1. Ensure MinIO bucket exists
+    try:
+        if not minio_client.bucket_exists(BUCKET_NAME):
+            minio_client.make_bucket(BUCKET_NAME)
+    except Exception as e:
+        print(f"⚠️ MinIO initialization warning: {e}")
+        
+    # 2. Safely Initialize Database Table Structure across multi-replica setups
+    table_creation_query = """
+    CREATE TABLE IF NOT EXISTS processed_docs (
+        id SERIAL PRIMARY KEY,
+        filename VARCHAR(255) NOT NULL,
+        extracted_text TEXT,
+        summary TEXT,
+        processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    """
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(table_creation_query)
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("✅ Database verification complete. Table structure is ready.")
+    except Exception as e:
+        # Catches the 'relation sequence already exists' error gracefully if another replica runs it simultaneously
+        print(f"⚠️ Notice during table initialization (likely handled by concurrent replica): {e}")
 
 @app.get("/")
 def read_root():
@@ -92,8 +117,8 @@ def get_processed_documents():
         # RealDictCursor parses rows automatically into clean dictionaries/JSON objects
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
-        # Querying columns including an calculated or stored word_count if available
-        cur.execute("SELECT id, filename, summary FROM processed_docs ORDER BY id DESC;")
+        # Added extracted_text into the query selection to properly support your frontend split view
+        cur.execute("SELECT id, filename, extracted_text, summary FROM processed_docs ORDER BY id DESC;")
         records = cur.fetchall()
         
         cur.close()
