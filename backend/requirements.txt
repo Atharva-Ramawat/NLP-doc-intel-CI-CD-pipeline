@@ -7,3 +7,5 @@ minio
 psycopg2-binary
 python-multipart
 pypdf
+transformers
+torch
