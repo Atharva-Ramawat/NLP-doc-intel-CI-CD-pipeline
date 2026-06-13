@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: nlp-fastapi-container
-        image: atharvaramawat/nlp-doc-intel:9e8c3a5
+        image: atharvaramawat/nlp-doc-intel:111907a
         imagePullPolicy: Always
         ports:
         - containerPort: 8000

@@ -95,9 +95,11 @@ async def upload_document(file: UploadFile = File(...)):
         )
         
         # 2. Push metadata payload to the Redis Job Queue for the NLP worker
+        # CORRECTED: Added "object_name" so the worker knows what to search for in MinIO!
         job_payload = {
             "filename": file.filename,
-            "bucket": BUCKET_NAME
+            "bucket": BUCKET_NAME,
+            "object_name": file.filename 
         }
         r.rpush("nlp_jobs", json.dumps(job_payload))
         
