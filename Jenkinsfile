@@ -51,7 +51,7 @@ pipeline {
 
         stage('Build Docker Images') {
             steps { 
-                // Build Backend pointing to the backend folder
+                
                 sh "docker build -t $BACKEND_IMAGE ./backend" 
                 
                 // Build Frontend pointing to the frontend folder
