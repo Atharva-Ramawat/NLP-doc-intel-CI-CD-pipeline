@@ -6,7 +6,7 @@ pipeline {
     }
     
     environment {
-        // Define both repositories
+      
         BACKEND_REPO = "atharvaramawat/nlp-doc-intel"
         FRONTEND_REPO = "atharvaramawat/nlp-frontend"
     }
