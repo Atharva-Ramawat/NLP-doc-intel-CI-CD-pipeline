@@ -43,7 +43,7 @@ pipeline {
             environment { SCANNER_HOME = tool 'sonar-scanner' }
             steps {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    // Fixed exclusions to safely ignore all virtual envs across both directories
+                    
                     sh "$SCANNER_HOME/bin/sonar-scanner -Dsonar.host.url=http://172.31.35.18:9000 -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=nlp-doc-intel -Dsonar.projectName=nlp-doc-intel -Dsonar.sources=. -Dsonar.python.version=3.10 -Dsonar.exclusions='**/venv/**,**/tests/**,**/*.txt'"
                 }
             }
