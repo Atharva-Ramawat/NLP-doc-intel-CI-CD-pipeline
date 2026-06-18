@@ -34,7 +34,7 @@ pipeline {
         
         stage('Run Unit Tests') {
             steps {
-                // Fixed: Mounts specifically to the /backend workspace where requirements and tests live
+                
                 sh 'docker run --rm -v "${WORKSPACE}/backend:/app" -w /app python:3.10-slim /bin/bash -c "pip install --no-cache-dir -r requirements.txt && pytest test_main.py -v"'
             }
         }
