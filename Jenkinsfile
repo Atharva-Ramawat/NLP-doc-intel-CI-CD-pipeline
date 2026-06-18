@@ -21,7 +21,7 @@ pipeline {
         stage('Set Version') {
             steps {
                 script {
-                    // Random Number (Git Hash) Versioning
+                   
                     env.VERSION = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     
                     // Assign tags for both images
