@@ -24,7 +24,7 @@ pipeline {
                    
                     env.VERSION = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     
-                    // Assign tags for both images
+                 
                     env.BACKEND_IMAGE = "${env.BACKEND_REPO}:${env.VERSION}"
                     env.FRONTEND_IMAGE = "${env.FRONTEND_REPO}:${env.VERSION}"
                 }
