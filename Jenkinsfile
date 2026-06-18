@@ -54,7 +54,7 @@ pipeline {
                 
                 sh "docker build -t $BACKEND_IMAGE ./backend" 
                 
-                // Build Frontend pointing to the frontend folder
+                
                 sh "docker build -t $FRONTEND_IMAGE ./frontend" 
             }
         }
