@@ -2,11 +2,11 @@ pipeline {
     agent any
     
     options {
-        buildDiscarder(logRotator(numToKeepStr: '5'))
+        buildDiscarder(logRotator(numToKeepStr: '6'))
     }
     
     environment {
-        // Define both repositories
+      
         BACKEND_REPO = "atharvaramawat/nlp-doc-intel"
         FRONTEND_REPO = "atharvaramawat/nlp-frontend"
     }
@@ -21,10 +21,10 @@ pipeline {
         stage('Set Version') {
             steps {
                 script {
-                    // Random Number (Git Hash) Versioning
+                   
                     env.VERSION = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     
-                    // Assign tags for both images
+                 
                     env.BACKEND_IMAGE = "${env.BACKEND_REPO}:${env.VERSION}"
                     env.FRONTEND_IMAGE = "${env.FRONTEND_REPO}:${env.VERSION}"
                 }
@@ -34,7 +34,7 @@ pipeline {
         
         stage('Run Unit Tests') {
             steps {
-                // Fixed: Mounts specifically to the /backend workspace where requirements and tests live
+                
                 sh 'docker run --rm -v "${WORKSPACE}/backend:/app" -w /app python:3.10-slim /bin/bash -c "pip install --no-cache-dir -r requirements.txt && pytest test_main.py -v"'
             }
         }
@@ -43,7 +43,7 @@ pipeline {
             environment { SCANNER_HOME = tool 'sonar-scanner' }
             steps {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    // Fixed exclusions to safely ignore all virtual envs across both directories
+                    
                     sh "$SCANNER_HOME/bin/sonar-scanner -Dsonar.host.url=http://172.31.35.18:9000 -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=nlp-doc-intel -Dsonar.projectName=nlp-doc-intel -Dsonar.sources=. -Dsonar.python.version=3.10 -Dsonar.exclusions='**/venv/**,**/tests/**,**/*.txt'"
                 }
             }
@@ -51,10 +51,10 @@ pipeline {
 
         stage('Build Docker Images') {
             steps { 
-                // Build Backend pointing to the backend folder
+                
                 sh "docker build -t $BACKEND_IMAGE ./backend" 
                 
-                // Build Frontend pointing to the frontend folder
+                
                 sh "docker build -t $FRONTEND_IMAGE ./frontend" 
             }
         }
