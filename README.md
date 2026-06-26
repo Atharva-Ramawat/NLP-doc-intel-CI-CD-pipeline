@@ -6,6 +6,14 @@ The project utilizes a microservices architecture deployed on Kubernetes, manage
 
 ---
 
+## User Interface
+
+The frontend is built with Streamlit, providing a clean, real-time dashboard for users to trigger the distributed pipeline, track execution status, and view the Hugging Face AI cognitive summaries side-by-side with the raw extracted text.
+
+![Document Intelligence UI](images/app.png)
+
+---
+
 ## System Architecture
 
 The application is broken down into highly decoupled services to ensure scalability, fault tolerance, and clear separation of concerns.
@@ -108,3 +116,36 @@ While Argo CD manages the production state, the cluster can be deployed manually
 ### Deploy the Application
 ```bash
 kubectl apply -f k8s/
+```
+
+### Verify Deployment
+```bash
+kubectl get pods -n default
+```
+Ensure all pods transition to the `Running` state.
+
+---
+
+## Repository Structure
+
+```text
+.
+├── backend/
+├── frontend/
+├── images/
+│   ├── app.png
+│   ├── argocd.png
+│   ├── aws.png
+│   ├── grafana.png
+│   ├── jenkins.png
+│   ├── sonarqube.png
+│   └── trivy.png
+├── k8s/
+├── Jenkinsfile
+└── README.md
+```
+
+---
+
+## Maintainer
+**Atharva Ramawat**
