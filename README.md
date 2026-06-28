@@ -126,26 +126,5 @@ Ensure all pods transition to the `Running` state.
 
 ---
 
-## Repository Structure
-
-```text
-.
-├── backend/
-├── frontend/
-├── images/
-│   ├── app.png
-│   ├── argocd.png
-│   ├── aws.png
-│   ├── grafana.png
-│   ├── jenkins.png
-│   ├── sonarqube.png
-│   └── trivy.png
-├── k8s/
-├── Jenkinsfile
-└── README.md
-```
-
----
-
 ## Maintainer
 **Atharva Ramawat**
