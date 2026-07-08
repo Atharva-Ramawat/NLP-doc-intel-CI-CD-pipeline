@@ -28,7 +28,7 @@ pipeline {
                     env.BACKEND_IMAGE = "${env.BACKEND_REPO}:${env.VERSION}"
                     env.FRONTEND_IMAGE = "${env.FRONTEND_REPO}:${env.VERSION}"
                 }
-                echo "🚀 Building Version: ${env.VERSION}"
+                echo "Building Version: ${env.VERSION}"
             }
         }
         
