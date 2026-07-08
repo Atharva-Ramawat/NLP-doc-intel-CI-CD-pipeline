@@ -32,7 +32,7 @@ pipeline {
             }
         }
         
-        stage('Run Unit Tests') {
+        stage('Unit Tests') {
             steps {
                 
                 sh 'docker run --rm -v "${WORKSPACE}/backend:/app" -w /app python:3.10-slim /bin/bash -c "pip install --no-cache-dir -r requirements.txt && pytest test_main.py -v"'
