@@ -48,7 +48,7 @@ st.markdown('<p class="main-header">🧠 NLP Document Intelligence Platform</p>'
 st.markdown('<p class="sub-header">Automated Ingestion, OCR, and AI Summarization Pipeline via Kubernetes</p>', unsafe_allow_html=True)
 st.markdown("---")
 
-# Sidebar for Uploads & Controls
+
 with st.sidebar:
     st.header("📥 Data Ingestion")
     st.markdown("Drop a file to trigger the distributed processing pipeline.")
