@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for polished layout, glowing effects, and clean typography
+
 st.markdown("""
     <style>
     .main-header {
