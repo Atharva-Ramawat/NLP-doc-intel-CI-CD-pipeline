@@ -3,7 +3,6 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Point to the internal Kubernetes service name & container port
 API_URL = "http://nlp-fastapi-service.default.svc.cluster.local:80"
 
 st.set_page_config(
