@@ -103,7 +103,7 @@ if not df.empty:
         filtered_df = df
 
     if not filtered_df.empty:
-        # Layout splitting: Data Metrics on Top
+       
         selected_doc = st.selectbox("Select a document to inspect cognitive insights:", filtered_df['filename'].unique())
         doc_details = filtered_df[filtered_df['filename'] == selected_doc].iloc[0]
         
