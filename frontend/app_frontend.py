@@ -43,7 +43,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Hero Section
+
 st.markdown('<p class="main-header">🧠 NLP Document Intelligence Platform</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Automated Ingestion, OCR, and AI Summarization Pipeline via Kubernetes</p>', unsafe_allow_html=True)
 st.markdown("---")
