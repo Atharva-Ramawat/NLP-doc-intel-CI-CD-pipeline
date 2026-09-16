@@ -1,4 +1,4 @@
-# Production-Grade Document Intelligence Pipeline
+## Production-Grade Document Intelligence Pipeline
 
 This repository contains the infrastructure and deployment configurations for an event-driven Document Intelligence Pipeline. The system is designed to ingest documents, manage them via an asynchronous message queue, perform Natural Language Processing (NLP) summarization and extraction using Hugging Face transformers, and store the results persistently.
 
